@@ -1,6 +1,7 @@
 Import("env")
 import os
 import subprocess
+import sys
 
 from SCons.Script import COMMAND_LINE_TARGETS
 
@@ -14,7 +15,8 @@ def ReadAndMaybeMinifyFiles(fullPath):
         with open(fullPath, "rb") as f:
             return f.read()
     originalSize = os.stat(fullPath).st_size
-    result = subprocess.run(['html-minifier-terser',
+    cmd = 'html-minifier-terser.cmd' if sys.platform == 'win32' else 'html-minifier-terser'
+    result = subprocess.run([cmd,
                            '--collapse-whitespace',
                            '--remove-comments',
                            '--minify-js',
