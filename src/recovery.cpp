@@ -19,13 +19,16 @@ AsyncWebServer webServer(80);
 }  // namespace
 
 void recovery_setup() {
+  // Keep recovery AP low power and isolated from station mode.
   WiFi.setOutputPower(0);
   WiFi.mode(WIFI_AP);
   WiFi.softAP(SSID_NAME);
   dnsServer.start(53, "*", WiFi.softAPIP());  // DNS spoofing.
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
+  // Recovery mode always starts from default settings.
   nukeSettings();
   webServer.onNotFound([&](AsyncWebServerRequest *request) {
+    // Captive-portal style redirect straight to OTA updater.
     request->redirect("http://" + WiFi.softAPIP().toString() + "/update");
   });
   webServer.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request) {
@@ -36,5 +39,6 @@ void recovery_setup() {
   });
   AsyncOta.listen(&webServer);
   webServer.begin();
+  // Poll DNS in the cooperative task queue.
   TaskQueue.postRecurringTask([&]() { dnsServer.processNextRequest(); });
 }

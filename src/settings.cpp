@@ -19,6 +19,7 @@ SettingsMsg DEFAULT_SETTINGS = SettingsMsg_init_default;
 const size_t MAX_SETTINGS_SIZE = SPI_FLASH_SEC_SIZE - 5;
 
 EEPROM_Rotate& getEeprom() {
+  // Ensure NVS is initialized before EEPROM_Rotate touches flash-backed storage.
   new NonVolatileStorage(0,0);
   static EEPROM_Rotate e;
   static bool initialized = false;
@@ -48,6 +49,7 @@ void sanitizeWifiPowerSetting() {
 
 void loadSettings() {
   auto& e = getEeprom();
+  // First two bytes store encoded proto length.
   uint16_t len = *(uint16_t*)e.getConstDataPtr();
   auto istream = pb_istream_from_buffer(getEeprom().getConstDataPtr() + 2,
                                         min<uint16_t>(len, MAX_SETTINGS_SIZE));
@@ -62,6 +64,7 @@ void loadSettings() {
 
 int32_t saveSettings() {
   auto& e = getEeprom();
+  // Persist serialized protobuf directly after the size header.
   auto stream = pb_ostream_from_buffer(e.getDataPtr() + 2, MAX_SETTINGS_SIZE);
   if (!pb_encode(&stream, &SettingsMsg_msg, Settings)) {
     DPRINTLN("Failed to encode settings.");
@@ -75,6 +78,7 @@ int32_t saveSettings() {
 
 int32_t saveSettingsAndRestartSoon() {
   int32_t code = saveSettings();
+  // Delay restart briefly so HTTP responses can flush to the client.
   TaskQueue.postOneShotTask([]() { ESP.restart(); }, 1000L);
   return code;
 }
@@ -82,6 +86,7 @@ int32_t saveSettingsAndRestartSoon() {
 void disableFlashPageRotation() { getEeprom().rotate(false); }
 
 void nukeSettings() {
+  // Factory reset settings and immediately persist them.
   *Settings = DEFAULT_SETTINGS;
   sanitizeWifiPowerSetting();
   saveSettings();

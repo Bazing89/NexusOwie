@@ -7,12 +7,14 @@
 #include "settings.h"
 #include "task_queue.h"
 
+// Clears the quick power-cycle marker after the startup window expires.
 void resetQuickPowerCycleCount() {
   Settings->quick_power_cycle_count = 0;
   saveSettings();
   DPRINTF("Wrote QPC = %d\n", Settings->quick_power_cycle_count);
 }
 
+// Detects a rapid reboot pattern used to enter recovery mode.
 bool isInRecoveryMode() {
   DPRINTF("Read QPC = %d\n", Settings->quick_power_cycle_count);
   bool recovery = false;
@@ -50,6 +52,7 @@ void maybeLockOnStartup() {
 }
 
 extern "C" void setup() {
+  // Avoid writing transient WiFi state to flash on each connect/disconnect.
   WiFi.persistent(false);
   loadSettings();
   // It is important to do this *BEFORE* calling isInRecoveryMode()
@@ -62,4 +65,5 @@ extern "C" void setup() {
   }
 }
 
+// TaskQueue drives all recurring and deferred work for this firmware.
 extern "C" void loop() { TaskQueue.process(); }

@@ -29,6 +29,7 @@ HardwareSerial Serial(0);
 BmsRelay *relay;
 
 void bms_setup() {
+  // Relay wires BMS serial traffic while letting firmware inspect/modify it.
   relay = new BmsRelay([]() { return Serial.read(); },
                        [](uint8_t b) {
                          // This if statement is what implements locking.
@@ -52,12 +53,14 @@ void bms_setup() {
                   FALLING);
 
   relay->addReceivedPacketCallback([](BmsRelay *, Packet *packet) {
+    // Blink built-in LED on every recognized packet as a lightweight heartbeat.
     static uint8_t ledState = 0;
     digitalWrite(LED_BUILTIN, ledState);
     ledState = 1 - ledState;
     streamBMSPacket(packet->start(), packet->len());
   });
   relay->setUnknownDataCallback([](uint8_t b) {
+    // Stream a bounded unknown-data buffer so the monitor can inspect noise.
     static std::vector<uint8_t> unknownData = {0};
     if (unknownData.size() > 128) {
       return;
@@ -67,6 +70,7 @@ void bms_setup() {
   });
 
   if (Settings->has_battery_state) {
+    // Restore persisted fuel-gauge calibration data from settings storage.
     FuelGaugeState gaugeState;
     gaugeState.bottomMilliampSeconds =
         Settings->battery_state.bottom_milliamp_seconds;
@@ -93,6 +97,7 @@ void bms_setup() {
 
   relay->setBMSSerialOverride(0xFFABCDEF);
 
+  // Bring up networking/UI and schedule main relay processing loop.
   setupWifi();
   setupWebServer(relay);
   TaskQueue.postRecurringTask([]() { relay->loop(); });
