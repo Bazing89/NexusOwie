@@ -247,7 +247,7 @@ void setupWifi() {
   if (strlen(Settings->ap_self_name) > 0) {
     snprintf(apName, sizeof(apName), Settings->ap_self_name);
   } else {
-    snprintf(apName, sizeof(apName), "Owie-%04X", ESP.getChipId() & 0xFFFF);
+    snprintf(apName, sizeof(apName), "NexusOwie-%04X", ESP.getChipId() & 0xFFFF);
   }
   WiFi.softAP(apName, Settings->ap_self_password);
   if (stationMode) {
