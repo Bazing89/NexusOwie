@@ -1,5 +1,6 @@
 Import("env")
 import os
+import shutil
 import subprocess
 
 from SCons.Script import COMMAND_LINE_TARGETS
@@ -14,7 +15,14 @@ def ReadAndMaybeMinifyFiles(fullPath):
         with open(fullPath, "rb") as f:
             return f.read()
     originalSize = os.stat(fullPath).st_size
-    result = subprocess.run(['html-minifier-terser',
+    # Resolved .cmd path: bare `html-minifier-terser` can hit npm's extensionless shim;
+    # Windows CreateProcess then fails.
+    minifier = shutil.which("html-minifier-terser")
+    if not minifier:
+        raise FileNotFoundError(
+            "html-minifier-terser not on PATH; install: npm install -g html-minifier-terser"
+        )
+    result = subprocess.run([minifier,
                            '--collapse-whitespace',
                            '--remove-comments',
                            '--minify-js',
