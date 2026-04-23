@@ -1,0 +1,17 @@
+{
+  "name": "Owie",
+  "version": "2.0.0-dev",
+  "home_assistant_domain": "owie",
+  "new_install_prompt_erase": true,
+  "builds": [
+    {
+      "chipFamily": "ESP8266",
+      "parts": [
+        {
+          "path": "./releases/v2.0.0-dev/firmware.bin",
+          "offset": 0
+        }
+      ]
+    }
+  ]
+}
