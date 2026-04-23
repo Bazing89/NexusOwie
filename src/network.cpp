@@ -24,6 +24,7 @@ BmsRelay *relay;
 const String owie_version = "2.0.0-dev";
 
 String renderPacketStatsTable() {
+  // Build a lightweight HTML table to embed in templated pages.
   String result(
       PSTR("<table><tr><th>ID</th><th>Period</th><th>Deviation</th><th>Count</"
            "th></tr>"));
@@ -77,6 +78,7 @@ String uptimeString() {
 }
 
 String getTempString() {
+  // Render 5 thermistor temperatures as one HTML row.
   const int8_t *thermTemps = relay->getTemperaturesCelsius();
   String temps;
   temps.reserve(256);
@@ -91,6 +93,7 @@ String getTempString() {
 }
 
 String generateOwieStatusJson() {
+  // JSON payload consumed by the auto-refreshing dashboard endpoint.
   DynamicJsonDocument status(1024);
   String jsonOutput;
   const uint16_t *cellMillivolts = relay->getCellMillivolts();
@@ -131,6 +134,7 @@ const char *lockedStatusDataAttrValue() {
 };
 
 String templateProcessor(const String &var) {
+  // Placeholder mapper for AsyncWebServer template rendering.
   if (var == "TOTAL_VOLTAGE") {
     return String(relay->getTotalVoltageMillivolts() / 1000.0,
                   /* decimalPlaces = */ 2);
@@ -234,6 +238,7 @@ String templateProcessor(const String &var) {
 void setupWifi() {
   WiFi.setOutputPower(Settings->wifi_power);
   bool stationMode = (strlen(Settings->ap_name) > 0);
+  // Always expose AP; optionally join upstream WiFi as station.
   WiFi.mode(stationMode ? WIFI_AP_STA : WIFI_AP);
   char apName[64];
   // sprintf isn't causing the issue of bungled SSID anymore (can't reproduce)
@@ -242,13 +247,14 @@ void setupWifi() {
   if (strlen(Settings->ap_self_name) > 0) {
     snprintf(apName, sizeof(apName), Settings->ap_self_name);
   } else {
-    snprintf(apName, sizeof(apName), "Owie-%04X", ESP.getChipId() & 0xFFFF);
+    snprintf(apName, sizeof(apName), "NexusOwie-%04X", ESP.getChipId() & 0xFFFF);
   }
   WiFi.softAP(apName, Settings->ap_self_password);
   if (stationMode) {
     WiFi.begin(Settings->ap_name, Settings->ap_password);
     WiFi.hostname(apName);
   }
+  // DNS wildcard gives captive-portal behavior while connected to AP.
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());  // DNS spoofing.
   TaskQueue.postRecurringTask([]() { dnsServer.processNextRequest(); });
@@ -256,6 +262,7 @@ void setupWifi() {
 
 void setupWebServer(BmsRelay *bmsRelay) {
   relay = bmsRelay;
+  // OTA endpoint is hosted on the same web server as the UI.
   AsyncOta.listen(&webServer);
   webServer.addHandler(&ws);
   webServer.onNotFound([](AsyncWebServerRequest *request) {
@@ -266,6 +273,7 @@ void setupWebServer(BmsRelay *bmsRelay) {
                [](AsyncWebServerRequest *request) { request->send(404); });
 
   webServer.on("/autoupdate", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // Lightweight machine-readable status for periodic polling.
     request->send(200, "application/json", generateOwieStatusJson());
   });
 
@@ -287,6 +295,7 @@ void setupWebServer(BmsRelay *bmsRelay) {
     request->send(response);
   });
   webServer.on("/battery", HTTP_ANY, [](AsyncWebServerRequest *request) {
+    // GET renders battery info; POST executes battery maintenance actions.
     switch (request->method()) {
       case HTTP_GET:
         request->send_P(200, "text/html", BATTERY_HTML_PROGMEM_ARRAY,
@@ -305,6 +314,7 @@ void setupWebServer(BmsRelay *bmsRelay) {
     request->send(404);
   });
   webServer.on("/wifi", HTTP_ANY, [](AsyncWebServerRequest *request) {
+    // Handles upstream STA credentials used in AP+STA mode.
     switch (request->method()) {
       case HTTP_GET:
         request->send_P(200, "text/html", WIFI_HTML_PROGMEM_ARRAY,
@@ -334,6 +344,7 @@ void setupWebServer(BmsRelay *bmsRelay) {
                     MONITOR_HTML_SIZE, templateProcessor);
   });
   webServer.on("/settings", HTTP_ANY, [](AsyncWebServerRequest *request) {
+    // Handles AP identity/security settings and radio power tuning.
     switch (request->method()) {
       case HTTP_GET:
         request->send_P(200, "text/html", SETTINGS_HTML_PROGMEM_ARRAY,
@@ -384,6 +395,7 @@ void setupWebServer(BmsRelay *bmsRelay) {
     request->send(404);
   });
   webServer.on("/lock", HTTP_GET, [](AsyncWebServerRequest *request) {
+    // Lock endpoints can unlock once, or arm/disarm auto-locking behavior.
     if (request->hasParam("unlock")) {
       Settings->is_locked = false;
       saveSettings();
@@ -408,5 +420,6 @@ void setupWebServer(BmsRelay *bmsRelay) {
 }
 
 void streamBMSPacket(uint8_t *const data, size_t len) {
+  // Push binary BMS frames to all connected websocket monitor clients.
   ws.binaryAll((char *const)data, len);
 }
