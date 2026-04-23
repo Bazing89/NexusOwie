@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Owie Web Installer</title>
+  <script type="module" src="https://unpkg.com/esp-web-tools@10.1.0/dist/web/install-button.js?module"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #ffffff;
+      --surface: #f5efff;
+      --border: #7a5cae;
+      --text: #2a184d;
+      --muted: #5d4586;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 16px 10px;
+    }
+    .shell {
+      width: min(720px, 100%);
+      margin: 0 auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 16px;
+    }
+    h1 { margin: 0 0 8px; font-size: 1.35rem; }
+    p, li { color: var(--muted); line-height: 1.45; }
+    .card {
+      background: #fff;
+      border: 1px solid #c8b6ea;
+      border-radius: 10px;
+      padding: 12px;
+      margin: 12px 0;
+    }
+    code {
+      background: #eee7ff;
+      border-radius: 6px;
+      padding: 2px 5px;
+      color: #31185e;
+    }
+    .install {
+      margin-top: 12px;
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <h1>Install Owie Firmware</h1>
+    <p>Flash Owie directly from your browser using ESP Web Tools.</p>
+
+    <div class="card">
+      <strong>Before you start</strong>
+      <ul>
+        <li>Use desktop Chrome or Edge (Web Serial is required).</li>
+        <li>Connect your ESP-12F through a USB ESP8266 programmer board.</li>
+        <li>If no device appears, install the USB-UART driver (CH340/CP210x/FTDI).</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <strong>ESP-12F wiring/programming notes</strong>
+      <ul>
+        <li>Power the module with stable 3.3V (not 5V direct to ESP pins).</li>
+        <li>For flashing mode, pull <code>GPIO0</code> LOW while resetting.</li>
+        <li>Ensure <code>EN/CH_PD</code> HIGH and <code>GPIO2</code> HIGH.</li>
+      </ul>
+    </div>
+
+    <div class="install">
+      <esp-web-install-button manifest="./manifest.json"></esp-web-install-button>
+    </div>
+  </main>
+</body>
+</html>

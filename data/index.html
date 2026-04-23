@@ -50,12 +50,12 @@
 </head>
 
 <body>
-    <div style="text-align:left;display:inline-block;color:#eaeaea;min-width:340px;">
-        <div id="statusHeader" style="text-align:center;color:#eaeaea;margin-bottom:10px;">
+    <div class="app-shell">
+        <div id="statusHeader" class="header">
             <h2>Owie Status</h2>
-            (%DISPLAY_AP_NAME%)
+            <div class="header-subtitle">(%DISPLAY_AP_NAME%)</div>
         </div>
-        <div id="content">
+        <div id="content" class="card">
             <table>
                 <tr>
                     <th>Battery Voltage</th>
@@ -116,9 +116,9 @@
                 Unlock Board
             </button>
         </div>
-        <div id="version" style="text-align:right;font-size:11px;">
+        <div id="version" class="version">
             <hr>
-            <p style="color:#aaa;">Owie <span id="OWIE_version">%OWIE_version%</span></p>
+            <p>Owie <span id="OWIE_version">%OWIE_version%</span></p>
         </div>
     </div>
 </body>

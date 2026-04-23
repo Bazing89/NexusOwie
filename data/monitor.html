@@ -10,17 +10,17 @@
 </head>
 
 <body>
-    <div style="text-align:left;display:inline-block;color:#eaeaea;min-width:340px;">
-        <div id="statusHeader" style="text-align:center;color:#eaeaea;margin-bottom:10px;">
+    <div class="app-shell">
+        <div id="statusHeader" class="header">
             <h2>Owie BMS data monitor</h2>
-            (%DISPLAY_AP_NAME%)
+            <div class="header-subtitle">(%DISPLAY_AP_NAME%)</div>
         </div>
-        <textarea readonly="1" id="term" cols="340" name="t1" wrap="off"></textarea>
+        <textarea readonly="1" id="term" name="t1" wrap="off"></textarea>
         <button id="startstop" onclick="connect();">Connect</button>
-        <p>
+        <p class="button-row">
             <button onclick="history.back()">Back</button>
         </p>
-        %PACKET_STATS_TABLE%
+        <div class="card">%PACKET_STATS_TABLE%</div>
         <script>
             let packets = [];
             let lastError = '';

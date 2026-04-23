@@ -20,6 +20,7 @@ class StringPrint : public Print {
   }
 };
 
+// Captures the Arduino Update library error text into a String.
 String getUpdateError() {
   StringPrint p;
   Update.printError(p);
@@ -56,6 +57,7 @@ void AsyncOtaClass::respondToOtaPostRequest(AsyncWebServerRequest *request) {
   response->addHeader("Access-Control-Allow-Origin", "*");
   request->send(response);
   if (!error) {
+    // On success, persist final settings and schedule reboot.
     this->endCallback_();
   }
 }
@@ -74,6 +76,7 @@ void AsyncOtaClass::listen(AsyncWebServer *server) {
           uint8_t *data, size_t len, bool final) {
         // Upload handles chunks in data
         if (!index) {
+          // First chunk: validate MD5 (if provided) and initialize updater.
           if (request->hasParam("MD5", true) &&
               !Update.setMD5(request->getParam("MD5", true)->value().c_str())) {
             return request->send(400, "text/plain", "MD5 parameter invalid");

@@ -1,8 +1,18 @@
-# Owie
+# NexusOwie
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/lolwheel/Owie)
 
-This project unlocks battery expansion possibilities on otherwise locked OneWheels, adds WiFi-based monitoring of various battery health signals such as individual cell voltages, current, etc.
+NexusOwie unlocks battery expansion possibilities on otherwise locked OneWheels, and adds WiFi-based monitoring of battery health signals such as individual cell voltages, current, and more.
+
+## Flash Firmware (Web Installer)
+
+Use the hosted installer page to flash firmware from your browser:
+
+- [Flash NexusOwie Firmware](https://sahit.github.io/NexusOwie/web-installer/)
+
+If your GitHub username/repo path is different, the URL format is:
+
+- `https://<your-user>.github.io/NexusOwie/web-installer/`
 
 # Disclaimer
 
@@ -64,6 +74,42 @@ Or follow these instructions below:
    6. Cover the bottom of the Wemos D1 mini with either fish tape or isolating tape so that none of the exposed soldering joints have any chance of contacting anything on the BMS. I also put a bunch of tape on the top of the board, just in case.
 
 DONE!
+
+## Self-hosted Web Installer (ESP Web Tools)
+
+This repo includes a ready-to-host installer page similar to `ow-breaker.github.io`.
+
+Files:
+
+- `docs/web-installer/index.html` - install page with `<esp-web-install-button>`
+- `docs/web-installer/manifest.json` - ESP Web Tools firmware manifest
+- `docs/web-installer/releases/v2.0.0-dev/` - place firmware binaries here
+
+### Build firmware
+
+Build firmware with PlatformIO and copy output binary into:
+
+- `docs/web-installer/releases/v2.0.0-dev/firmware.bin`
+
+Example:
+
+- build: `pio run -e esp12f_programmer`
+- output usually at: `.pio/build/esp12f_programmer/firmware.bin`
+
+### Host with GitHub Pages
+
+1. Push these files to your GitHub repo.
+2. In GitHub settings, enable Pages and choose deploy from branch.
+3. Select branch `main` (or your default branch) and folder `/docs`.
+4. Open `https://<your-user>.github.io/<your-repo>/web-installer/`.
+
+Because Web Serial requires secure context, use HTTPS hosting only (GitHub Pages/Netlify/Vercel).
+
+### UX and compatibility notes
+
+- Browser support: desktop Chrome/Edge recommended.
+- If no serial device appears, install your USB-UART driver (CH340/CP210x/FTDI).
+- For ESP-12F modules, use a proper ESP8266 programmer and ensure boot pins are correct (GPIO0 low during flash, EN high, GPIO2 high).
 
 ## Troubleshooting:
 

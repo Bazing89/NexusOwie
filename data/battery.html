@@ -10,10 +10,11 @@
 </head>
 
 <body>
-    <div style="text-align:left;display:inline-block;color:#eaeaea;min-width:340px;">
-        <div id="statusHeader" style="text-align:center;color:#eaeaea;margin-bottom:10px;">
+    <div class="app-shell">
+        <div id="statusHeader" class="header">
             <h2>Owie Battery</h2>
         </div>
+        <div class="card">
         <table>
             <tr>
                 <th>SOC</th>
@@ -40,6 +41,7 @@
                 <td>%CURRENT_MILLIAMP_HOURS% mAh</td>
             </tr>
         </table>
+        </div>
         <p></p>
         <form method="post">
             <input type="hidden" name="reset_stats">
