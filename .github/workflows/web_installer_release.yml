@@ -1,0 +1,66 @@
+name: Update web installer release assets
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  publish-web-installer-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: ${{ runner.os }}-${{ hashFiles('**/lockfiles') }}
+
+      - name: Install build dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+          npm install html-minifier-terser -g
+
+      - name: Build firmware for web installer
+        run: pio run -e esp12f_programmer
+
+      - name: Copy firmware into versioned release folder
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          mkdir -p "docs/web-installer/releases/${TAG_NAME}"
+          cp ".pio/build/esp12f_programmer/firmware.bin" "docs/web-installer/releases/${TAG_NAME}/firmware.bin"
+
+      - name: Update web installer manifest
+        env:
+          TAG_NAME: ${{ github.ref_name }}
+        run: |
+          python - <<'PY'
+          import json
+          from pathlib import Path
+
+          tag = __import__("os").environ["TAG_NAME"]
+          manifest_path = Path("docs/web-installer/manifest.json")
+          data = json.loads(manifest_path.read_text(encoding="utf-8"))
+          data["version"] = tag
+          data["builds"][0]["parts"][0]["path"] = f"./releases/{tag}/firmware.bin"
+          manifest_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
+          PY
+
+      - name: Commit and push updated installer assets
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore: update web installer assets for ${{ github.ref_name }}"
+          file_pattern: docs/web-installer/**
