@@ -1,8 +1,20 @@
-# Owie
+# NexusOwie
 
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/lolwheel/Owie)
+[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/Bazing89/NexusOwie)
 
-This project unlocks battery expansion possibilities on otherwise locked OneWheels, adds WiFi-based monitoring of various battery health signals such as individual cell voltages, current, etc.
+NexusOwie unlocks battery expansion possibilities on otherwise locked OneWheels, and adds WiFi-based monitoring of battery health signals such as individual cell voltages, current, and more.
+
+## Flash Firmware (Web Installer)
+
+Use the hosted installer page to flash firmware from your browser:
+
+- [Flash NexusOwie Firmware](https://bazing89.github.io/NexusOwie/web-installer/)
+
+**GitHub Pages:** Leave **Custom domain** empty unless you own a domain (e.g. `flash.example.com`). Do not enter `github.io` URLs or paths there — your site URL is chosen by branch + `/docs` and is always `https://<user>.github.io/<repo>/…`.
+
+If your GitHub username or repo name differs, the installer URL format is:
+
+- `https://<your-user>.github.io/<repo-name>/web-installer/`
 
 # Disclaimer
 
@@ -64,6 +76,42 @@ Or follow these instructions below:
    6. Cover the bottom of the Wemos D1 mini with either fish tape or isolating tape so that none of the exposed soldering joints have any chance of contacting anything on the BMS. I also put a bunch of tape on the top of the board, just in case.
 
 DONE!
+
+## Self-hosted Web Installer (ESP Web Tools)
+
+This repo includes a ready-to-host installer page similar to `ow-breaker.github.io`.
+
+Files:
+
+- `docs/web-installer/index.html` - install page with `<esp-web-install-button>`
+- `docs/web-installer/manifest.json` - ESP Web Tools firmware manifest
+- `docs/web-installer/releases/v2.0.0-dev/` - place firmware binaries here
+
+### Build firmware
+
+Build firmware with PlatformIO and copy output binary into:
+
+- `docs/web-installer/releases/v2.0.0-dev/firmware.bin`
+
+Example:
+
+- build: `pio run -e esp12f_programmer`
+- output usually at: `.pio/build/esp12f_programmer/firmware.bin`
+
+### Host with GitHub Pages
+
+1. Push these files to your GitHub repo.
+2. In **Settings → Pages**, set **Source** to **Deploy from a branch**.
+3. Under **Branch**, pick the branch that actually contains `docs/` (often `main`; use another branch such as `OriginalCode` if that is where `docs/web-installer/` lives). Set **Folder** to **`/docs`**. Leave **Custom domain** empty unless you use your own domain.
+4. After the site builds, open the installer at `https://bazing89.github.io/NexusOwie/web-installer/` (replace user/repo if yours differ).
+
+Because Web Serial requires secure context, use HTTPS hosting only (GitHub Pages/Netlify/Vercel).
+
+### UX and compatibility notes
+
+- Browser support: desktop Chrome/Edge recommended.
+- If no serial device appears, install your USB-UART driver (CH340/CP210x/FTDI).
+- For ESP-12F modules, use a proper ESP8266 programmer and ensure boot pins are correct (GPIO0 low during flash, EN high, GPIO2 high).
 
 ## Troubleshooting:
 
