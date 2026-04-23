@@ -65,6 +65,42 @@ Or follow these instructions below:
 
 DONE!
 
+## Self-hosted Web Installer (ESP Web Tools)
+
+This repo includes a ready-to-host installer page similar to `ow-breaker.github.io`.
+
+Files:
+
+- `docs/web-installer/index.html` - install page with `<esp-web-install-button>`
+- `docs/web-installer/manifest.json` - ESP Web Tools firmware manifest
+- `docs/web-installer/releases/v2.0.0-dev/` - place firmware binaries here
+
+### Build firmware
+
+Build firmware with PlatformIO and copy output binary into:
+
+- `docs/web-installer/releases/v2.0.0-dev/firmware.bin`
+
+Example:
+
+- build: `pio run -e esp12f_programmer`
+- output usually at: `.pio/build/esp12f_programmer/firmware.bin`
+
+### Host with GitHub Pages
+
+1. Push these files to your GitHub repo.
+2. In GitHub settings, enable Pages and choose deploy from branch.
+3. Select branch `main` (or your default branch) and folder `/docs`.
+4. Open `https://<your-user>.github.io/<your-repo>/web-installer/`.
+
+Because Web Serial requires secure context, use HTTPS hosting only (GitHub Pages/Netlify/Vercel).
+
+### UX and compatibility notes
+
+- Browser support: desktop Chrome/Edge recommended.
+- If no serial device appears, install your USB-UART driver (CH340/CP210x/FTDI).
+- For ESP-12F modules, use a proper ESP8266 programmer and ensure boot pins are correct (GPIO0 low during flash, EN high, GPIO2 high).
+
 ## Troubleshooting:
 
 ### Board reporting battery at 1% after install
