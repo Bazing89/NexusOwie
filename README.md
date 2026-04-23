@@ -1,8 +1,18 @@
-# Owie
+# NexusOwie
 
 [![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/lolwheel/Owie)
 
-This project unlocks battery expansion possibilities on otherwise locked OneWheels, adds WiFi-based monitoring of various battery health signals such as individual cell voltages, current, etc.
+NexusOwie unlocks battery expansion possibilities on otherwise locked OneWheels, and adds WiFi-based monitoring of battery health signals such as individual cell voltages, current, and more.
+
+## Flash Firmware (Web Installer)
+
+Use the hosted installer page to flash firmware from your browser:
+
+- [Flash NexusOwie Firmware](https://sahit.github.io/NexusOwie/web-installer/)
+
+If your GitHub username/repo path is different, the URL format is:
+
+- `https://<your-user>.github.io/NexusOwie/web-installer/`
 
 # Disclaimer
 
