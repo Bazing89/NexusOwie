@@ -8,52 +8,83 @@
   <style>
     :root {
       color-scheme: light;
-      --bg: #ffffff;
-      --surface: #f5efff;
-      --border:rgb(17, 231, 221);
-      --text:rgb(17, 231, 221);
-      --muted:rgb(17, 231, 221);
+      --bg: #e4f7f5;
+      --shell: linear-gradient(160deg, #0a3f3d 0%, #0d5c58 45%, #0a6b66 100%);
+      --white: #ffffff;
+      --muted: rgb(17, 231, 221);
+      --border: rgba(17, 231, 221, 0.45);
+      --card-text: #0a2f2d;
+      --card-muted: #2d5a56;
+      --code-bg: #dff8f5;
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: Verdana, sans-serif;
       background: var(--bg);
-      color: var(--text);
-      padding: 16px 10px;
+      color: var(--card-text);
+      padding: 20px 12px 32px;
+      min-height: 100vh;
     }
     .shell {
       width: min(720px, 100%);
       margin: 0 auto;
-      background: var(--surface);
+      background: var(--shell);
       border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 16px;
+      border-radius: 16px;
+      padding: 20px 18px 22px;
+      box-shadow: 0 8px 32px rgba(10, 63, 61, 0.22);
     }
-    h1 { margin: 0 0 8px; font-size: 1.35rem; }
-    p, li { color: var(--muted); line-height: 1.45; }
+    .shell > h1 {
+      margin: 0 0 6px;
+      font-size: 1.4rem;
+      color: var(--white);
+    }
+    .shell > p.lead {
+      margin: 0 0 4px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+    p, li { line-height: 1.5; }
     .card {
-      background: #fff;
-      border: 1px solid #c8b6ea;
-      border-radius: 10px;
-      padding: 12px;
+      background: var(--white);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 14px 4px;
       margin: 12px 0;
+      color: var(--card-text);
+      box-shadow: 0 2px 12px rgba(10, 63, 61, 0.08);
     }
+    .card strong {
+      display: block;
+      margin-bottom: 8px;
+      color: #065a55;
+    }
+    .card ul { margin: 0 0 10px; padding-left: 1.2em; }
+    .card li { color: var(--card-muted); }
     code {
-      background: #eee7ff;
+      background: var(--code-bg);
+      border: 1px solid rgba(17, 231, 221, 0.35);
       border-radius: 6px;
-      padding: 2px 5px;
-      color:rgb(17, 231, 221);
+      padding: 2px 6px;
+      color: #047a72;
+      font-size: 0.92em;
     }
     .install {
-      margin-top: 12px;
+      margin-top: 14px;
+    }
+    /* ESP Web Tools: theme the shadow-DOM "Connect" button (inherits on host) */
+    esp-web-install-button {
+      --esp-tools-button-color: #0a7a73;
+      --esp-tools-button-text-color: #ffffff;
+      --esp-tools-button-border-radius: 10px;
     }
   </style>
 </head>
 <body>
   <main class="shell">
     <h1>Install Owie Firmware</h1>
-    <p>Flash Owie directly from your browser using ESP Web Tools.</p>
+    <p class="lead">Flash Owie directly from your browser using ESP Web Tools.</p>
 
     <div class="card">
       <strong>Before you start</strong>
