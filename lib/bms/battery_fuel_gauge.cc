@@ -1,5 +1,6 @@
 #include "battery_fuel_gauge.h"
 
+#include <algorithm>
 #include <cmath>
 
 #include "defer.h"
@@ -23,8 +24,8 @@ int32_t openCircuitSocFromCellVoltage(int32_t cellVoltageMillivolts) {
       LOOKUP_TABLE_RANGE_MAX_MV - LOOKUP_TABLE_RANGE_MIN_MV;
   // (RANGE - 1) upper limit effectively clamps the leftIndex below to
   // (LOOKUP_TABLE_SIZE - 2)
-  cellVoltageMillivolts =
-      clamp(cellVoltageMillivolts - LOOKUP_TABLE_RANGE_MIN_MV, 0, RANGE - 1);
+  cellVoltageMillivolts = clamp<int32_t>(
+      cellVoltageMillivolts - LOOKUP_TABLE_RANGE_MIN_MV, 0, RANGE - 1);
   float floatIndex =
       float(cellVoltageMillivolts) * (LOOKUP_TABLE_SIZE - 1) / RANGE;
   const int32_t leftIndex = int(floatIndex);

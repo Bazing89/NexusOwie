@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#include "ESP8266WiFi.h"
+#include "platform_compat.h"
 #include "bms_main.h"
 #include "dprint.h"
 #include "recovery.h"
@@ -49,7 +49,7 @@ void maybeLockOnStartup() {
   }
 }
 
-extern "C" void setup() {
+void setup() {
   WiFi.persistent(false);
   loadSettings();
   // It is important to do this *BEFORE* calling isInRecoveryMode()
@@ -62,4 +62,10 @@ extern "C" void setup() {
   }
 }
 
-extern "C" void loop() { TaskQueue.process(); }
+void loop() {
+  // RS485 BMS<->main board relay is safety-critical and must never be
+  // delayed behind WiFi/background work, so it runs first, every iteration,
+  // outside the cooperative TaskQueue.
+  bms_process_uart();
+  TaskQueue.process();
+}

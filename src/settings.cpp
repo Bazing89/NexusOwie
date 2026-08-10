@@ -1,34 +1,34 @@
 #include "settings.h"
 
 #include <Esp.h>
+#include <Preferences.h>
 
-#include "EEPROM_Rotate.h"
+#include <algorithm>
+
 #include "dprint.h"
 #include "pb_decode.h"
 #include "pb_encode.h"
-#include "spi_flash_geometry.h"
 #include "task_queue.h"
-#include "nvs.h"
 
 namespace {
 SettingsMsg __settings = SettingsMsg_init_default;
 
 SettingsMsg DEFAULT_SETTINGS = SettingsMsg_init_default;
 
-// 3 bytes needed by EEPROM_Rotate + 2 byte proto message size
-const size_t MAX_SETTINGS_SIZE = SPI_FLASH_SEC_SIZE - 5;
+// ESP32: settings are persisted as a length-prefixed protobuf blob inside
+// ESP-IDF NVS via Preferences (replaces ESP8266's EEPROM_Rotate).
+constexpr size_t MAX_SETTINGS_SIZE = 4096 - 2;
+constexpr char kPrefsNamespace[] = "owie";
+constexpr char kPrefsKey[] = "settings";
 
-EEPROM_Rotate& getEeprom() {
-  new NonVolatileStorage(0,0);
-  static EEPROM_Rotate e;
-  static bool initialized = false;
-  if (!initialized) {
-    e.size(4);
-    e.offset(MAX_SETTINGS_SIZE);
-    e.begin(SPI_FLASH_SEC_SIZE);
-    initialized = true;
-  }
-  return e;
+Preferences &getPrefs() {
+  static Preferences prefs;
+  return prefs;
+}
+
+uint8_t *settingsBuffer() {
+  static uint8_t buffer[2 + MAX_SETTINGS_SIZE];
+  return buffer;
 }
 }  // namespace
 
@@ -47,9 +47,20 @@ void sanitizeWifiPowerSetting() {
 }
 
 void loadSettings() {
-  auto& e = getEeprom();
-  uint16_t len = *(uint16_t*)e.getConstDataPtr();
-  auto istream = pb_istream_from_buffer(getEeprom().getConstDataPtr() + 2,
+  auto &prefs = getPrefs();
+  prefs.begin(kPrefsNamespace, /* readOnly = */ true);
+  const size_t storedLen = prefs.getBytesLength(kPrefsKey);
+  if (storedLen < 2) {
+    prefs.end();
+    DPRINTLN("No settings stored, resetting.");
+    nukeSettings();  // nukeSettings() calls saveSettings()
+    return;
+  }
+  uint8_t *buffer = settingsBuffer();
+  prefs.getBytes(kPrefsKey, buffer, min<size_t>(storedLen, 2 + MAX_SETTINGS_SIZE));
+  prefs.end();
+  uint16_t len = *(uint16_t *)buffer;
+  auto istream = pb_istream_from_buffer(buffer + 2,
                                         min<uint16_t>(len, MAX_SETTINGS_SIZE));
   if (pb_decode(&istream, &SettingsMsg_msg, Settings)) {
     DPRINTF("Read and decoded settings, size = %d bytes.", len);
@@ -61,14 +72,17 @@ void loadSettings() {
 }
 
 int32_t saveSettings() {
-  auto& e = getEeprom();
-  auto stream = pb_ostream_from_buffer(e.getDataPtr() + 2, MAX_SETTINGS_SIZE);
+  uint8_t *buffer = settingsBuffer();
+  auto stream = pb_ostream_from_buffer(buffer + 2, MAX_SETTINGS_SIZE);
   if (!pb_encode(&stream, &SettingsMsg_msg, Settings)) {
     DPRINTLN("Failed to encode settings.");
     return -1;
   }
-  *(int16_t*)e.getDataPtr() = (int16_t)stream.bytes_written;
-  e.commit();
+  *(uint16_t *)buffer = (uint16_t)stream.bytes_written;
+  auto &prefs = getPrefs();
+  prefs.begin(kPrefsNamespace, /* readOnly = */ false);
+  prefs.putBytes(kPrefsKey, buffer, 2 + stream.bytes_written);
+  prefs.end();
   DPRINTF("Serialized settings, size = %d bytes.", stream.bytes_written);
   return stream.bytes_written;
 }
@@ -79,7 +93,9 @@ int32_t saveSettingsAndRestartSoon() {
   return code;
 }
 
-void disableFlashPageRotation() { getEeprom().rotate(false); }
+void disableFlashPageRotation() {
+  // No-op: Preferences/NVS has no rotating EEPROM sectors to freeze.
+}
 
 void nukeSettings() {
   *Settings = DEFAULT_SETTINGS;

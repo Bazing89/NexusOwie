@@ -1,10 +1,10 @@
 #include "async_ota.h"
 
 #include <Arduino.h>
+#include <Update.h>
 
 #include "ESPAsyncWebServer.h"
 #include "data.h"
-#include "flash_hal.h"
 #include "settings.h"
 
 namespace {
@@ -79,7 +79,6 @@ void AsyncOtaClass::listen(AsyncWebServer *server) {
             return request->send(400, "text/plain", "MD5 parameter invalid");
           }
 
-          Update.runAsync(true);
           uint32_t maxSketchSpace =
               (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
           if (!Update.begin(maxSketchSpace,

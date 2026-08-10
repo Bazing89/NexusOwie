@@ -1,7 +1,7 @@
 #include "network.h"
 
 #include <DNSServer.h>
-#include <ESP8266WiFi.h>
+#include "platform_compat.h"
 #include <ESPAsyncWebServer.h>
 
 #include <functional>
@@ -205,7 +205,7 @@ String templateProcessor(const String &var) {
                Settings->ap_self_name);
     } else {
       snprintf(apDisplayName, sizeof(apDisplayName), "Owie-%04X",
-               ESP.getChipId() & 0xFFFF);
+               owieDeviceIdSuffix());
     }
     return String(apDisplayName);
   } else if (var == "WIFI_POWER") {
@@ -232,7 +232,7 @@ String templateProcessor(const String &var) {
 }  // namespace
 
 void setupWifi() {
-  WiFi.setOutputPower(Settings->wifi_power);
+  owieSetWifiTxPower(Settings->wifi_power);
   bool stationMode = (strlen(Settings->ap_name) > 0);
   WiFi.mode(stationMode ? WIFI_AP_STA : WIFI_AP);
   char apName[64];
@@ -242,12 +242,12 @@ void setupWifi() {
   if (strlen(Settings->ap_self_name) > 0) {
     snprintf(apName, sizeof(apName), Settings->ap_self_name);
   } else {
-    snprintf(apName, sizeof(apName), "Owie-%04X", ESP.getChipId() & 0xFFFF);
+    snprintf(apName, sizeof(apName), "Owie-%04X", owieDeviceIdSuffix());
   }
   WiFi.softAP(apName, Settings->ap_self_password);
   if (stationMode) {
     WiFi.begin(Settings->ap_name, Settings->ap_password);
-    WiFi.hostname(apName);
+    owieSetWifiHostname(apName);
   }
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
   dnsServer.start(53, "*", WiFi.softAPIP());  // DNS spoofing.

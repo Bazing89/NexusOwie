@@ -29,9 +29,9 @@ jobs:
       - name: Run tests Owie
         run: pio test -e native
       - name: Build Owie
-        run: pio run -e d1_mini_lite_clone
+        run: pio run -e esp32-c3
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           name: firmware
-          path: .pio/build/d1_mini_lite_clone/firmware.bin
+          path: .pio/build/esp32-c3/firmware.bin

@@ -13,7 +13,8 @@ int32_t saveSettings();
 
 int32_t saveSettingsAndRestartSoon();
 /**
- * @brief Call befor OTA.
+ * @brief Call before OTA. No-op on ESP32 (Preferences/NVS has no EEPROM
+ * sector rotation to pause, unlike the ESP8266 EEPROM_Rotate backend).
  */
 void disableFlashPageRotation();
 
