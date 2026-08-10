@@ -204,7 +204,7 @@ String templateProcessor(const String &var) {
       snprintf(apDisplayName, sizeof(apDisplayName), "%s",
                Settings->ap_self_name);
     } else {
-      snprintf(apDisplayName, sizeof(apDisplayName), "Owie-%04X",
+      snprintf(apDisplayName, sizeof(apDisplayName), "NexusOwie-%04X",
                owieDeviceIdSuffix());
     }
     return String(apDisplayName);
@@ -242,7 +242,7 @@ void setupWifi() {
   if (strlen(Settings->ap_self_name) > 0) {
     snprintf(apName, sizeof(apName), Settings->ap_self_name);
   } else {
-    snprintf(apName, sizeof(apName), "Owie-%04X", owieDeviceIdSuffix());
+    snprintf(apName, sizeof(apName), "NexusOwie-%04X", owieDeviceIdSuffix());
   }
   WiFi.softAP(apName, Settings->ap_self_password);
   if (stationMode) {

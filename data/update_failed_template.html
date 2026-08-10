@@ -1,23 +1,26 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- The HTML markup is based on the main page of Tasmota -->
 
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
-    <title>Owie Failed</title>
-    <link rel="stylesheet" href="styles.css">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+  <title>Owie Update - Failed</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='20' fill='%23000'/%3E%3Ctext x='50' y='68' font-size='58' text-anchor='middle' fill='%23fff' font-family='monospace' font-weight='bold'%3EO%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
 </head>
 
 <body>
-    <div style="text-align:left;display:inline-block;color:#eaeaea;min-width:340px;">
-        <div id="statusHeader" style="text-align:center;color:#eaeaea;margin-bottom:10px;">
-            <h2>Update Failed: %UPDATE_ERROR%</h2>
-            <p>
-                <button onclick="history.back()">Back</button>
-            </p>
-        </div>
+  <main class="card">
+    <div class="status-icon error">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M6 6l12 12M18 6L6 18" stroke-linecap="round" />
+      </svg>
     </div>
+    <h1>Update Failed</h1>
+    <p class="subtitle">The firmware could not be flashed.</p>
+    <pre class="error-box">%UPDATE_ERROR%</pre>
+    <button onclick="history.back()">Try Again</button>
+  </main>
 </body>
 
 </html>
