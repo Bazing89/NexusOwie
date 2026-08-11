@@ -1,6 +1,5 @@
 #include "recovery.h"
 
-#include <ArduinoOTA.h>
 #include <DNSServer.h>
 #include "platform_compat.h"
 #include <ESPAsyncWebServer.h>
@@ -10,7 +9,7 @@
 #include "settings.h"
 #include "task_queue.h"
 
-#define SSID_NAME ("Owie-recovery")
+#define SSID_NAME ("NexusOwie-recovery")
 
 namespace {
 DNSServer dnsServer;
@@ -30,7 +29,7 @@ void recovery_setup() {
   webServer.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncWebServerResponse *response = request->beginResponse_P(
         200, "text/css", STYLES_CSS_PROGMEM_ARRAY, STYLES_CSS_SIZE);
-    response->addHeader("Cache-Control", "max-age=3600");
+    response->addHeader("Cache-Control", "no-cache");
     request->send(response);
   });
   AsyncOta.listen(&webServer);

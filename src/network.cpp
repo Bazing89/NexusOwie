@@ -276,7 +276,7 @@ void setupWebServer(BmsRelay *bmsRelay) {
   webServer.on("/styles.css", HTTP_GET, [](AsyncWebServerRequest *request) {
     AsyncWebServerResponse *response = request->beginResponse_P(
         200, "text/css", STYLES_CSS_PROGMEM_ARRAY, STYLES_CSS_SIZE);
-    response->addHeader("Cache-Control", "max-age=3600");
+    response->addHeader("Cache-Control", "no-cache");
     request->send(response);
   });
   webServer.on("/dev_settings", HTTP_GET, [](AsyncWebServerRequest *request) {

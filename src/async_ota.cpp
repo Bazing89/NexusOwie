@@ -26,10 +26,18 @@ String getUpdateError() {
   return p.getString();
 }
 
+// Avoid sending a second HTTP response if begin/write/end already replied.
+bool responseSent = false;
+
 }  // namespace
 
 void AsyncOtaClass::respondToOtaPostRequest(AsyncWebServerRequest *request) {
   // the request handler is triggered after the upload has finished
+  if (responseSent) {
+    return;
+  }
+  responseSent = true;
+
   int responseCode;
   const uint8_t *reponse;
   size_t responseLen;
@@ -74,23 +82,34 @@ void AsyncOtaClass::listen(AsyncWebServer *server) {
           uint8_t *data, size_t len, bool final) {
         // Upload handles chunks in data
         if (!index) {
+          responseSent = false;
+          if (Update.isRunning()) {
+            Update.abort();
+          }
           if (request->hasParam("MD5", true) &&
               !Update.setMD5(request->getParam("MD5", true)->value().c_str())) {
+            responseSent = true;
             return request->send(400, "text/plain", "MD5 parameter invalid");
           }
 
-          uint32_t maxSketchSpace =
-              (ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000;
-          if (!Update.begin(maxSketchSpace,
-                            U_FLASH)) {  // Start with max available size
+          // ESP32: pass UPDATE_SIZE_UNKNOWN so the Update library uses the OTA
+          // partition size. The ESP8266 (getFreeSketchSpace()-0x1000) formula is
+          // wrong here and can reject valid images or confuse erase sizing.
+          if (!Update.begin(UPDATE_SIZE_UNKNOWN, U_FLASH)) {
             respondToOtaPostRequest(request);
+            return;
           }
           this->startCallback_();
+        }
+
+        if (responseSent) {
+          return;
         }
 
         // Write chunked data to the free sketch space
         if (len && Update.write(data, len) != len) {
           respondToOtaPostRequest(request);
+          return;
         }
 
         if (final) {  // if the final flag is set then this is the last frame of
