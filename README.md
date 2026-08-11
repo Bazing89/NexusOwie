@@ -27,41 +27,58 @@ This is a hobby project for its contributors and comes with absolutely no guaran
 - Be comfortable with opening your board's battery enclosure.
   - For the PINT you require a somewhat exotic Torx 5-point security bit, size TS20. [Amazon link](https://www.amazon.com/gp/product/B07TC79LVH)
   - For the XR+ you will need a 3/32" Allen key. [Amazon link](https://www.amazon.com/dp/B0000CBJE1)
-- Wemos D1 Mini Lite - the cheapest and most compact ESP8266 board that I'm aware of. You can find those on Aliexpress and Amazon. Buy version without the metal shield or ceramic WiFi antenna on it as they're too bulky to fit inside of the battery enclosure. [5 pack Amazon Link](https://www.amazon.com/dp/B081PX9YFV).
+- **ESP32-C3 module** — this firmware targets the ESP32-C3 (not the original ESP8266 Wemos D1 Mini). Two common boards work:
+  - **ESP32-C3 Super Mini** — recommended for installation inside the OneWheel. It is about the same size as the old Wemos D1 Mini and fits well in the battery enclosure. Look for a board **without** a bulky ceramic WiFi antenna if space is tight. Common on AliExpress and Amazon.
+  - **ESP32-C3-DevKitM-1** — Espressif's official dev kit; fine for bench testing and first-time USB flashing before you install the module in the board.
+  - Both boards use the **same GPIO numbers** in firmware; only the silkscreen labels differ. See [docs/esp32-c3-wiring.md](docs/esp32-c3-wiring.md) for the full pinout.
 
 ## Flashing Owie for the first time
 
-1. Download the latest [`firmware.bin`](https://github.com/lolwheel/Owie/releases/latest/download/firmware.bin).
-2. Follow the instruction on the ESP WebTools page [here](https://ow-breaker.github.io/). Note that firmware flashed through this website might be older than the latest official release. To make sure that you're running the latest version, follow the instructions in the "Updating Owie" section below after the initial flash.
-3. Verify the flash success: When the chip is on, you should see
-   a WiFi network called `Owie-XXXX`. Connecting to it should send you straight to the status page of the Owie board. Don't worry about the data because the board isn't hooked up yet.
+1. Download the latest [`firmware.bin`](https://github.com/lolwheel/Owie/releases/latest/download/firmware.bin) from this repo's Releases (or build with `pio run -e esp32-c3`).
+2. Connect the ESP32-C3 to your computer over **USB** (USB-C on most Super Mini boards) and flash the firmware. Options:
+   - **PlatformIO:** `pio run -e esp32-c3 -t upload`
+   - **ESP Web Tools:** follow the instructions on the ESP Web Tools page [here](https://ow-breaker.github.io/) if a build is hosted for ESP32-C3.
+3. After flashing, the module should boot normally. Once installed in the board and powered from the BMS, you can connect with the NexusOwie companion app over BLE to verify telemetry (the board does not need to be wired to the BMS for a basic USB bench test).
 
 ## Installation into the board:
 
-NEW: Follow this step-by-step installation video made by one of the community members - https://www.youtube.com/watch?v=HhKdwnYUbA0
+Follow this step-by-step installation video made by one of the community members — the BMS harness prep is the same even though the video shows a Wemos D1 Mini: https://www.youtube.com/watch?v=HhKdwnYUbA0
 
-Or follow these instructions below:
+Or follow these instructions below (ESP32-C3 / Super Mini wiring):
 
-1. Install Owie firmware onto your Wemos D1 mini as instructed above.
-2. NEW: I highly recommend physically removing the reset button from the chip with pliers to exclude possibility of it accidentally getting pressed while inside of your OneWheel.
+1. Flash NexusOwie firmware onto your ESP32-C3 module as instructed above (USB on the Super Mini or DevKit).
+2. I highly recommend physically removing or covering the **BOOT/RESET** button on the module so it cannot be pressed accidentally inside the OneWheel enclosure.
 3. Disassemble your board and open the battery enclosure.
 4. Disconnect all wires from BMS, strictly in the following order:
-   1. Battery balance lead - the leftmost connector (24 wires) on the BMS.
-   2. Battery main lead - an XT60 connector on the rightmost side of the BMS.
-   3. All the other wires to the BMS, the order here doesn't matter.
-5. Prepare your Wemos D1 Mini and BMS:
-   1. Tin 4 consecutive pins on Wemos D1 Mini marked as **TX, RX, D1, D2** as well as **5v, GND** pins.
-   2. Solder a small wire **on the top of the board** connecting the pin marked as **TX** to the pin marked as **D2**
-   3. Solder power pickup wires to the BMS. The JWFFM chip installation video demonstrates this well - [YouTube: Power pickup from BMS](https://youtu.be/kSWicH8hUFo?t=1028)
-   4. Cut the **WHITE** and **GREEN** wires from the three-wire connector around 3/4 of an inch from the connector. Wrap the Green wire **leading to the BMS**(the 3/4 inch stub) in an isolating wire as we won't be needing it. Tin the other three wire endings, you'll be soldering those to the Wemos D1 Mini.
-      Again, JWFFM install video has a good demonstration of this: [YouTube: Cutting GREEN and WHITE wires](https://youtu.be/kSWicH8hUFo?t=453)
-6. Connecting wires to your Wemos D1 Mini. I found it much easier to solder these to the bottom of the board:
-   1. Connect the **GROUND** wire from the **BMS**, the middle wire out of the BMS 5 pin connector to **GND** on Wemos D1.
-   2. Connect the **5v** wire, the other one from BMS to the **5v** on the board.
-   3. Connect the **WHITE** wire **RUNNING TO THE MAIN BOARD** to the **TX** pin on the board.
-   4. Connect the **GREEN** wire **RUNNING TO THE MAIN BOARD** to the **D1** pin on the board.
-   5. Connect the **WHITE** stubby wire running to the **BMS** to the **RX** pin on the board.
-   6. Cover the bottom of the Wemos D1 mini with either fish tape or isolating tape so that none of the exposed soldering joints have any chance of contacting anything on the BMS. I also put a bunch of tape on the top of the board, just in case.
+   1. Battery balance lead — the leftmost connector (24 wires) on the BMS.
+   2. Battery main lead — an XT60 connector on the rightmost side of the BMS.
+   3. All the other wires to the BMS; the order here doesn't matter.
+5. Prepare your ESP32-C3 module and BMS:
+   1. Tin **GPIO1** (TX), **GPIO3** (RX), **GPIO4**, **GPIO5**, **3.3V**, and **GND** on the module. On an ESP32-C3 Super Mini these correspond to **GPIO1**, **D1/GPIO3**, **D2/GPIO4**, **GPIO5**, **3V3**, and **GND** on the pinout diagram below.
+   2. **Required on-board jumper:** solder a short wire on the module connecting **GPIO1 (TX) → GPIO4**. The firmware monitors GPIO4 and drives the inverted RS485 B line on GPIO5 — the same trick the original Wemos install used (TX → D2), without a MAX485 chip.
+   3. Solder power pickup wires to the BMS. The JWFFM chip installation video demonstrates this well — [YouTube: Power pickup from BMS](https://youtu.be/kSWicH8hUFo?t=1028). Power the ESP32-C3 from **3.3 V**, not 5 V.
+   4. Cut the **WHITE** and **GREEN** wires from the three-wire BMS↔main-board connector about 3/4 of an inch from the connector. Wrap the **GREEN** stub **toward the BMS** in insulating tape — it is not used. Tin the other three wire ends.
+      Again, the JWFFM install video has a good demonstration: [YouTube: Cutting GREEN and WHITE wires](https://youtu.be/kSWicH8hUFo?t=453)
+
+   ESP32-C3 Super Mini pinout — NexusOwie uses **GPIO1** (TX), **GPIO3** (RX), **GPIO4** (jumper from TX), **GPIO5** (RS485 B line), **3V3**, and **GND**:
+
+   <img src="docs/img/esp32-c3-super-mini-pinout.png?raw=true" height="360px">
+
+6. Connect the harness wires to your ESP32-C3 module (soldering to the bottom of a Super Mini often works best):
+
+   | OneWheel wire | Direction | ESP32-C3 pin |
+   |---|---|---|
+   | **GND** (middle wire on BMS 5-pin connector) | BMS → module | **GND** |
+   | **3.3 V standby** (from BMS pickup) | BMS → module | **3.3V** |
+   | **WHITE** | BMS → module (receive) | **GPIO3** (RX) |
+   | **WHITE** | Module → main board (transmit) | **GPIO1** (TX) |
+   | **GREEN** | Module → main board (RS485 B line) | **GPIO5** |
+
+   Do **not** use GPIO0, GPIO2, or GPIO9 for custom wiring — they are boot/strapping pins on ESP32-C3.
+
+7. Insulate the module thoroughly (fish tape or electrical tape on top and bottom) so no solder joints can short against the BMS or enclosure.
+
+For a diagram, DevKit pin reference, and Wemos→ESP32-C3 mapping, see **[docs/esp32-c3-wiring.md](docs/esp32-c3-wiring.md)**.
 
 DONE!
 
@@ -70,16 +87,6 @@ DONE!
 ### Board reporting battery at 1% after install
 
 If after installing OWIE into your board it reports that your battery is at 1% even though it shouldn't, plug your board into a charger. This problem occurs because the BMS goes through a state reset and doesn't know the status of the battery, and plugging the board into a charger corrects this issue by forcing the BMS (and controller potentially) to do a state check.
-
-Pictures demonstrating soldering points on the board:
-
-<img src= "docs/img/wemos_d1_top.png?raw=true" height="180px">
-
-<img src="docs/img/wemos_d1_bottom.png?raw=true" height="180px">
-
-How it looks in my setup:
-
-<img src="docs/img/wemos_d1_installed.jpg" height="180px">
 
 # Board Locking functionality
 
